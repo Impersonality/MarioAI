@@ -26,14 +26,14 @@ def main():
     # 环境参数
     game = 'SuperMarioWorld-Snes'
     state = 'Start'
-    num_envs = 16  # 根据你的CPU核心数量调整
+    num_envs = 12  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 100000
-    initial_learning_rate = 0.0003
+    total_timesteps = 1000000
+    initial_learning_rate = 2.5e-4
     learning_rate_schedule = linear_schedule(initial_learning_rate, total_timesteps)
 
-    initial_clip_range = 0.2
+    initial_clip_range = 0.15
     clip_range_schedule = linear_schedule(initial_clip_range, total_timesteps)
 
     # 使用SubprocVecEnv来创建并行环境
@@ -43,7 +43,7 @@ def main():
     checkpoint_callback = CheckpointCallback(save_freq=10000, save_path='./logs/', name_prefix='rl_model')
 
     # 创建一个新的PPO模型
-    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=512, gamma=0.9,
+    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=512, gamma=0.94, n_epochs=4,
                 tensorboard_log='./ppo_mario_tensorboard/',
                 learning_rate=learning_rate_schedule,
                 clip_range=clip_range_schedule)
