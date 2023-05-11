@@ -2,35 +2,57 @@ import os
 import gym
 import retro
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 
 
+def make_env(game, state, seed=0):
+    def _init():
+        env = retro.make(game, state)
+        env = Monitor(env)
+        env.seed(seed)
+        return env
+    return _init
+
+
+def linear_schedule(initial_value, total_timesteps):
+    def schedule(timesteps):
+        return initial_value * (1 - timesteps / total_timesteps)
+    return schedule
+
+
 def main():
-    # 环境名称
-    env_name = 'SuperMarioWorld-Snes'
+    # 环境参数
+    game = 'SuperMarioWorld-Snes'
+    state = 'Start'
+    num_envs = 16  # 根据你的CPU核心数量调整
 
-    # 创建一个环境实例
-    env = retro.make(env_name, state='Start')
-    env = Monitor(env)
+    # model参数
+    total_timesteps = 100000
+    initial_learning_rate = 0.0003
+    learning_rate_schedule = linear_schedule(initial_learning_rate, total_timesteps)
 
-    # 使用stable_baselines3的DummyVecEnv包装环境
-    # 这将使我们能够更轻松地使用stable_baselines3库
-    env = DummyVecEnv([lambda: env])
-    
-    
+    initial_clip_range = 0.2
+    clip_range_schedule = linear_schedule(initial_clip_range, total_timesteps)
+
+    # 使用SubprocVecEnv来创建并行环境
+    env = SubprocVecEnv([make_env(game, state, i) for i in range(num_envs)])
+
     # 创建一个评估回调，这将定期评估模型并将结果写入 TensorBoard
-    checkpoint_callback = CheckpointCallback(save_freq=10000, save_path='./logs/',
-                                             name_prefix='rl_model')
+    checkpoint_callback = CheckpointCallback(save_freq=10000, save_path='./logs/', name_prefix='rl_model')
+
     # 创建一个新的PPO模型
-    model = PPO('CnnPolicy', env, verbose=1, tensorboard_log="./ppo_mario_tensorboard/")
+    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=512, gamma=0.9,
+                tensorboard_log='./ppo_mario_tensorboard/',
+                learning_rate=learning_rate_schedule,
+                clip_range=clip_range_schedule)
 
     # 在环境中训练模型
-    model.learn(total_timesteps=100000, callback=checkpoint_callback)
+    model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
 
     # 保存模型
-    model.save(f'{env_name}_ppo_model')
+    model.save(f'{game}_ppo_model')
 
     # 关闭环境
     env.close()
