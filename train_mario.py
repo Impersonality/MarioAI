@@ -16,10 +16,10 @@ def make_env(game, state, seed=0):
     return _init
 
 
-def linear_schedule(initial_value, total_timesteps):
-    def schedule(timesteps):
-        return initial_value * (1 - timesteps / total_timesteps)
-    return schedule
+def linear_schedule(initial_value, final_value):
+    def scheduler(progress):
+        return final_value + progress * (initial_value - final_value)
+    return scheduler
 
 
 def main():
@@ -29,18 +29,16 @@ def main():
     num_envs = 12  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 1000000
-    initial_learning_rate = 2.5e-4
-    learning_rate_schedule = linear_schedule(initial_learning_rate, total_timesteps)
+    total_timesteps = 10000000
+    learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
 
-    initial_clip_range = 0.15
-    clip_range_schedule = linear_schedule(initial_clip_range, total_timesteps)
+    clip_range_schedule = linear_schedule(0.15, 0.025)
 
     # 使用SubprocVecEnv来创建并行环境
     env = SubprocVecEnv([make_env(game, state, i) for i in range(num_envs)])
 
     # 创建一个评估回调，这将定期评估模型并将结果写入 TensorBoard
-    checkpoint_callback = CheckpointCallback(save_freq=10000, save_path='./logs/', name_prefix='rl_model')
+    checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs/', name_prefix='rl_model')
 
     # 创建一个新的PPO模型
     model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=512, gamma=0.94, n_epochs=4,
