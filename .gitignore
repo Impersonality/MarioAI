@@ -4,3 +4,4 @@ SuperMarioWorld-Snes_ppo_model*.zip
 logs/
 logs_1/
 ppo_mario_tensorboard/
+.ipynb_checkpoints/
