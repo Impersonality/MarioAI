@@ -1,5 +1,6 @@
 .idea/
 data/
 SuperMarioWorld-Snes_ppo_model*.zip
-log/
+logs/
+logs_1/
 ppo_mario_tensorboard/
