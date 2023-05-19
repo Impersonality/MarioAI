@@ -29,10 +29,12 @@ def main():
     num_envs = 6  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 100000
-    learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
+    total_timesteps = 1000000
+    # learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
+    learning_rate_schedule = 1e-4
 
-    clip_range_schedule = linear_schedule(0.15, 0.025)
+    # clip_range_schedule = linear_schedule(0.15, 0.025)
+    clip_range_schedule = 0.2
 
     # 使用SubprocVecEnv来创建并行环境
     env = SubprocVecEnv([make_env(game, state, i) for i in range(num_envs)])
@@ -40,14 +42,15 @@ def main():
     # 创建一个评估回调，这将定期评估模型并将结果写入 TensorBoard
     checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs_1/', name_prefix='rl_model')
 
-    # # 创建一个新的PPO模型
-    # model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=2048, gamma=0.94, n_epochs=4,
-    #             tensorboard_log='./ppo_mario_tensorboard/',
-    #             learning_rate=learning_rate_schedule,
-    #             clip_range=clip_range_schedule)
+    # 创建一个新的PPO模型
+    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=16, n_steps=512, gamma=0.9, n_epochs=10,
+                gae_lambda=1, ent_coef=0.01,
+                tensorboard_log='./ppo_mario_tensorboard/',
+                learning_rate=learning_rate_schedule,
+                clip_range=clip_range_schedule)
 
-    # 加载最近保存的模型检查点
-    model = PPO.load('logs_1/rl_model_9937500_steps.zip', env)
+    # # 加载最近保存的模型检查点
+    # model = PPO.load('logs_1/rl_model_9937500_steps.zip', env)
 
     # 在环境中训练模型
     model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
