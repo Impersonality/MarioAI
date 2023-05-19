@@ -13,13 +13,20 @@ def make_env(game, state, seed=0):
         env = Monitor(env)
         env.seed(seed)
         return env
+
     return _init
 
 
 def linear_schedule(initial_value, final_value):
     def scheduler(progress):
         return final_value + progress * (initial_value - final_value)
+
     return scheduler
+
+
+def custom_reward(env, reward):
+    info = env.g
+    return
 
 
 def main():
@@ -51,6 +58,9 @@ def main():
 
     # # 加载最近保存的模型检查点
     # model = PPO.load('logs_1/rl_model_9937500_steps.zip', env)
+
+    # 自定义奖励函数
+    env.env_method('reward_fn', custom_reward)
 
     # 在环境中训练模型
     model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
