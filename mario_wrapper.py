@@ -101,9 +101,8 @@ class CustomWrapper(gym.Wrapper):
             done = True
 
         # If mario is standing still or going backwards for 1000 frames, end his try.
-        if self.counter == 1000:
+        if self.counter >= 100:
             self.fitness_current -= 125
-            done = True
 
             # If mario dies, dead becomes 0, so when it is 0, penalize him and move on.
         if dead == 0:
