@@ -1,10 +1,22 @@
 import gym
+import cv2
+import numpy as np
+
+
+def process_frame(frame):
+    if frame is not None:
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frame = cv2.resize(frame, (84, 84))[None, :, :] / 255.
+        return frame
+    else:
+        return np.zeros((1, 84, 84))
 
 
 class CustomWrapper(gym.Wrapper):
     def __init__(self, env):
         super(CustomWrapper, self).__init__(env)
 
+        self.curr_score = 0
         self.fitness_current = 0
         self.counter = 0
         self.score = 0
@@ -19,8 +31,7 @@ class CustomWrapper(gym.Wrapper):
         self.power_ups_last = 0
 
     def reset(self):
-        obs = self.env.reset()
-
+        self.curr_score = 0
         self.fitness_current = 0
         self.counter = 0
         self.score = 0
@@ -33,10 +44,13 @@ class CustomWrapper(gym.Wrapper):
         self.y_pos_previous = 0
         self.checkpoint = False
         self.power_ups_last = 0
-        return obs
+        return process_frame(self.env.reset())
 
     def step(self, action):
-        obs, _reward, _done, info = self.env.step(action)
+        obs, reward, done, info = self.env.step(action)
+        obs = process_frame(obs)
+        reward += (info["score"] - self.curr_score) / 40.
+        self.curr_score = info["score"]
 
         score = info['score']
         coins = info['coins']
@@ -127,4 +141,4 @@ class CustomWrapper(gym.Wrapper):
             self.fitness_current -= 100
             done = True
 
-        return obs, self.fitness_current*0.1, done, info
+        return obs, reward/10. + self.fitness_current * 0.001, done, info
