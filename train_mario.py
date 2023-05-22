@@ -1,19 +1,18 @@
-import os
-import gym
 import retro
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
+from mario_wrapper import CustomWrapper
 
 
 def make_env(game, state, seed=0):
     def _init():
         env = retro.make(game, state)
+        env = CustomWrapper(env)  # 使用自定义奖励函数包装环境
         env = Monitor(env)
         env.seed(seed)
         return env
-
     return _init
 
 
@@ -24,11 +23,6 @@ def linear_schedule(initial_value, final_value):
     return scheduler
 
 
-def custom_reward(env, reward):
-    info = env.g
-    return
-
-
 def main():
     # 环境参数
     game = 'SuperMarioWorld-Snes'
@@ -37,17 +31,17 @@ def main():
 
     # model参数
     total_timesteps = 100000
-    # learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
-    learning_rate_schedule = 1e-4
+    learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
+    # learning_rate_schedule = 1e-4
 
-    # clip_range_schedule = linear_schedule(0.15, 0.025)
-    clip_range_schedule = 0.2
+    clip_range_schedule = linear_schedule(0.15, 0.025)
+    # clip_range_schedule = 0.2
 
     # 使用SubprocVecEnv来创建并行环境
     env = SubprocVecEnv([make_env(game, state, i) for i in range(num_envs)])
 
     # 创建一个评估回调，这将定期评估模型并将结果写入 TensorBoard
-    checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs_1/', name_prefix='rl_model')
+    checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs/', name_prefix='rl_model')
 
     # 创建一个新的PPO模型
     model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=16, n_steps=512, gamma=0.9, n_epochs=10,
@@ -58,9 +52,6 @@ def main():
 
     # # 加载最近保存的模型检查点
     # model = PPO.load('logs_1/rl_model_9937500_steps.zip', env)
-
-    # 自定义奖励函数
-    env.env_method('reward_fn', custom_reward)
 
     # 在环境中训练模型
     model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
