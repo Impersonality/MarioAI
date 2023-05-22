@@ -30,7 +30,7 @@ def main():
     num_envs = 6  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 10000000
+    total_timesteps = 1000000
     learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
     # learning_rate_schedule = 1e-4
 
