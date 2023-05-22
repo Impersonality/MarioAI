@@ -18,6 +18,22 @@ class CustomWrapper(gym.Wrapper):
         self.checkpoint = False
         self.power_ups_last = 0
 
+    def reset(self):
+        self.env.reset()
+
+        self.fitness_current = 0
+        self.counter = 0
+        self.score = 0
+        self.score_tracker = 0
+        self.coins = 0
+        self.coins_tracker = 0
+        self.yoshi_coins = 0
+        self.yoshi_coins_tracker = 0
+        self.x_pos_previous = 0
+        self.y_pos_previous = 0
+        self.checkpoint = False
+        self.power_ups_last = 0
+
     def step(self, action):
         obs, _reward, _done, info = self.env.step(action)
 
