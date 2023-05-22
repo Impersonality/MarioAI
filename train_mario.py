@@ -44,7 +44,8 @@ def main():
     checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs/', name_prefix='rl_model')
 
     # 创建一个新的PPO模型
-    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=512, gamma=0.94, n_epochs=4,
+    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=64, n_steps=512, gamma=0.9, n_epochs=10,
+                gae_lambda=1, ent_coef=0.01,
                 tensorboard_log='./ppo_mario_tensorboard/',
                 learning_rate=learning_rate_schedule,
                 clip_range=clip_range_schedule)
