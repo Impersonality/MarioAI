@@ -5,6 +5,7 @@ class CustomReward(Wrapper):
     def __init__(self, env=None):
         super(CustomReward, self).__init__(env)
         self.curr_score = 0
+        self.current_x = 40
 
     def step(self, action):
         state, reward, done, info = self.env.step(action)
@@ -15,9 +16,12 @@ class CustomReward(Wrapper):
                 reward += 50
             else:
                 reward -= 50
+        if info["x_pos"] <= self.current_x:
+            reward -= 1
+        self.current_x = info["x_pos"]
         return state, reward / 10., done, info
 
     def reset(self):
         self.curr_score = 0
+        self.current_x = 40
         return self.env.reset()
-
