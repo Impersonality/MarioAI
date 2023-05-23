@@ -28,7 +28,7 @@ def linear_schedule(initial_value, final_value):
 
 
 def main():
-    num_envs = 1  # 根据你的CPU核心数量调整
+    num_envs = 6  # 根据你的CPU核心数量调整
 
     # model参数
     total_timesteps = 100000
