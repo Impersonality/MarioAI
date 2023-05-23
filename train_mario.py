@@ -1,14 +1,18 @@
 import retro
+import gym_super_mario_bros
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
 from mario_wrapper import CustomWrapper
+from nes_py.wrappers import JoypadSpace
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 
-def make_env(game, state, seed=0):
+def make_env(seed=0):
     def _init():
-        env = retro.make(game, state)
+        env = gym_super_mario_bros.make('SuperMarioBros-v0')
+        env = JoypadSpace(env, SIMPLE_MOVEMENT)
         env = CustomWrapper(env)  # 使用自定义奖励函数包装环境
         env = Monitor(env)
         env.seed(seed)
@@ -24,13 +28,10 @@ def linear_schedule(initial_value, final_value):
 
 
 def main():
-    # 环境参数
-    game = 'SuperMarioWorld-Snes'
-    state = 'Start'
     num_envs = 6  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 10000000
+    total_timesteps = 1000000
     learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
     # learning_rate_schedule = 1e-4
 
@@ -38,7 +39,7 @@ def main():
     # clip_range_schedule = 0.2
 
     # 使用SubprocVecEnv来创建并行环境
-    env = SubprocVecEnv([make_env(game, state, i) for i in range(num_envs)])
+    env = SubprocVecEnv([make_env(i) for i in range(num_envs)])
 
     # 创建一个评估回调，这将定期评估模型并将结果写入 TensorBoard
     checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs/', name_prefix='rl_model')
@@ -57,7 +58,7 @@ def main():
     model.learn(total_timesteps=total_timesteps, callback=checkpoint_callback)
 
     # 保存模型
-    model.save(f'{game}_ppo_model')
+    model.save('mario_ppo_model')
 
     # 关闭环境
     env.close()
