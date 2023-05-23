@@ -1,17 +1,16 @@
 import gym
 import retro
 from stable_baselines3 import PPO
+import gym_super_mario_bros
 
 
 def main():
-    env_name = 'SuperMarioWorld-Snes'
-    model_path = f'{env_name}_ppo_model'
+    model_path = 'mario_ppo_model'
 
     # 加载训练好的模型
     model = PPO.load(model_path)
 
-    # 创建一个环境实例
-    env = retro.make(env_name, state='Start')
+    env = gym_super_mario_bros.make('SuperMarioBros-v0')
 
     num_episodes = 10
     for episode in range(num_episodes):

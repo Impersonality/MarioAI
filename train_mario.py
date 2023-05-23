@@ -4,7 +4,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
-from mario_wrapper import CustomWrapper
+from mario_wrapper import CustomReward
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
@@ -13,7 +13,7 @@ def make_env(seed=0):
     def _init():
         env = gym_super_mario_bros.make('SuperMarioBros-v0')
         env = JoypadSpace(env, SIMPLE_MOVEMENT)
-        env = CustomWrapper(env)  # 使用自定义奖励函数包装环境
+        env = CustomReward(env)
         env = Monitor(env)
         env.seed(seed)
         return env
@@ -28,10 +28,10 @@ def linear_schedule(initial_value, final_value):
 
 
 def main():
-    num_envs = 6  # 根据你的CPU核心数量调整
+    num_envs = 1  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 1000000
+    total_timesteps = 5000
     learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
     # learning_rate_schedule = 1e-4
 
