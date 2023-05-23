@@ -1,5 +1,3 @@
-import gym
-import retro
 from stable_baselines3 import PPO
 import gym_super_mario_bros
 

@@ -1,4 +1,3 @@
-import retro
 import gym_super_mario_bros
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
@@ -11,7 +10,7 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 def make_env(seed=0):
     def _init():
-        env = gym_super_mario_bros.make('SuperMarioBros-v0')
+        env = gym_super_mario_bros.make('SuperMarioBros-v2')
         env = JoypadSpace(env, SIMPLE_MOVEMENT)
         env = CustomReward(env)
         env = Monitor(env)
