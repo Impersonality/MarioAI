@@ -20,8 +20,8 @@ def main():
 
         while not done:
             # 使用训练好的模型来选择动作
-            action, _ = model.predict(obs)
-            obs, reward, done, info = env.step(action)
+            action, _ = model.predict(obs.copy())
+            obs, reward, done, info = env.step(action.item())
 
             # 累积奖励
             total_reward += reward
