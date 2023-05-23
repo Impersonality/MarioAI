@@ -8,7 +8,7 @@ def main():
     # 加载训练好的模型
     model = PPO.load(model_path)
 
-    env = gym_super_mario_bros.make('SuperMarioBros-v0')
+    env = gym_super_mario_bros.make('SuperMarioBros-v2')
 
     num_episodes = 10
     for episode in range(num_episodes):

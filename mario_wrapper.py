@@ -17,7 +17,7 @@ class CustomReward(Wrapper):
             else:
                 reward -= 50
         if info["x_pos"] <= self.current_x:
-            reward -= 1
+            reward -= 3
         self.current_x = info["x_pos"]
         return state, reward / 10., done, info
 

@@ -30,7 +30,7 @@ def main():
     num_envs = 6  # 根据你的CPU核心数量调整
 
     # model参数
-    total_timesteps = 1000000
+    total_timesteps = 500000
     learning_rate_schedule = linear_schedule(2.5e-4, 2.5e-6)
     # learning_rate_schedule = 1e-4
 
@@ -44,8 +44,8 @@ def main():
     checkpoint_callback = CheckpointCallback(save_freq=31250, save_path='./logs/', name_prefix='rl_model')
 
     # 创建一个新的PPO模型
-    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=64, n_steps=512, gamma=0.9, n_epochs=10,
-                gae_lambda=1, ent_coef=0.01,
+    model = PPO('CnnPolicy', env, device='cuda', verbose=1, batch_size=512, n_steps=512, gamma=0.9, n_epochs=10,
+                gae_lambda=1, ent_coef=0.05,
                 tensorboard_log='./ppo_mario_tensorboard/',
                 learning_rate=learning_rate_schedule,
                 clip_range=clip_range_schedule)
